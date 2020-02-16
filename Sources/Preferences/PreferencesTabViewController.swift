@@ -81,6 +81,18 @@ final class PreferencesTabViewController: NSViewController, PreferencesStyleCont
 			activateTab(index: 0, animated: false)
 		}
 	}
+	
+	func setWindowFrameNeedsUpdate(animated: Bool) {
+		guard let activeTab = activeTab else {
+			assertionFailure("setWindowFrameNeedsUpdate called before a tab was displayed; transition only works from one tab to another")
+			return
+		}
+		
+		view.removeConstraints(activeChildViewConstraints)
+		let fromViewController = preferencePanes[activeTab]
+		activeChildViewConstraints = fromViewController.view.constrainToSuperviewBounds()
+		setWindowFrame(for: fromViewController, animated: animated)
+	}
 
 	private func updateWindowTitle(tabIndex: Int) {
 		self.window.title = {

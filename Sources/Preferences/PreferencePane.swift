@@ -39,3 +39,11 @@ extension PreferencePane.Identifier {
 		NSToolbarItem.Identifier(rawValue)
 	}
 }
+
+extension PreferencePane {
+	public func setNeedsUpdateLayout(animated: Bool) {
+		if let tabViewController = self.parent as? PreferencesTabViewController {
+			tabViewController.setWindowFrameNeedsUpdate(animated: animated)
+		}
+	}
+}
