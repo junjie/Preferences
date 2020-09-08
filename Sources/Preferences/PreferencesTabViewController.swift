@@ -3,6 +3,7 @@ import Cocoa
 final class PreferencesTabViewController: NSViewController, PreferencesStyleControllerDelegate {
 	private var activeTab: Int?
 	private var preferencePanes = [PreferencePane]()
+	private var style: Preferences.Style?
 	internal var preferencePanesCount: Int { preferencePanes.count }
 	private var preferencesStyleController: PreferencesStyleController!
 	private var isKeepingWindowCentered: Bool { preferencesStyleController.isKeepingWindowCentered }
@@ -16,13 +17,14 @@ final class PreferencesTabViewController: NSViewController, PreferencesStyleCont
 	var isAnimated: Bool = true
 
 	override func loadView() {
-		self.view = NSView()
-		self.view.translatesAutoresizingMaskIntoConstraints = false
+		view = NSView()
+		view.translatesAutoresizingMaskIntoConstraints = false
 	}
 
-	func configure(preferencePanes: [PreferencePane], style: PreferencesStyle) {
+	func configure(preferencePanes: [PreferencePane], style: Preferences.Style) {
 		self.preferencePanes = preferencePanes
-		self.children = preferencePanes
+		self.style = style
+		children = preferencePanes
 
 		let toolbar = NSToolbar(identifier: "PreferencesToolbar")
 		toolbar.allowsUserCustomization = false
@@ -50,7 +52,7 @@ final class PreferencesTabViewController: NSViewController, PreferencesStyleCont
 		activateTab(preferenceIdentifier: preferencePane.preferencePaneIdentifier, animated: animated)
 	}
 
-	func activateTab(preferenceIdentifier: PreferencePane.Identifier, animated: Bool) {
+	func activateTab(preferenceIdentifier: Preferences.PaneIdentifier, animated: Bool) {
 		guard let index = (preferencePanes.firstIndex { $0.preferencePaneIdentifier == preferenceIdentifier }) else {
 			return activateTab(index: 0, animated: animated)
 		}
@@ -95,7 +97,7 @@ final class PreferencesTabViewController: NSViewController, PreferencesStyleCont
 	}
 
 	private func updateWindowTitle(tabIndex: Int) {
-		self.window.title = {
+		window.title = {
 			if preferencePanes.count > 1 {
 				return preferencePanes[tabIndex].preferencePaneTitle
 			} else {
@@ -219,7 +221,7 @@ extension PreferencesTabViewController: NSToolbarDelegate {
 	}
 
 	func toolbarSelectableItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		toolbarItemIdentifiers
+		style == .segmentedControl ? [] : toolbarItemIdentifiers
 	}
 
 	public func toolbar(
@@ -231,6 +233,6 @@ extension PreferencesTabViewController: NSToolbarDelegate {
 			return nil
 		}
 
-		return preferencesStyleController.toolbarItem(preferenceIdentifier: .Identifier(fromToolbarItemIdentifier: itemIdentifier))
+		return preferencesStyleController.toolbarItem(preferenceIdentifier: Preferences.PaneIdentifier(fromToolbarItemIdentifier: itemIdentifier))
 	}
 }
